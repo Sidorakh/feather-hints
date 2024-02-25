@@ -1,0 +1,5 @@
+{
+    "name": "feather-hints",
+    "scripts": ["main.js"],
+    "stylesheets": ["tooltip.css"]
+}
