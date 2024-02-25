@@ -67,6 +67,10 @@ const path = require('path');
         structures: {},
         enumerations: {},
     }
+    const mouse = {
+        x: -1,
+        y: -1,
+    }
     GMEdit.register("feather-hints", {
         init: function() {
             
@@ -106,10 +110,10 @@ const path = require('path');
 
             const tags = {
                 functions: [...xml.getElementsByTagName("Function")],
-                variables: [...xml.getElementsByTagName("Variables")],
-                constants: [...xml.getElementsByTagName("Constants")],
-                structures: [...xml.getElementsByTagName("Structures")],
-                enumerations: [...xml.getElementsByTagName("Enumerations")],
+                variables: [...xml.getElementsByTagName("Variable")],
+                constants: [...xml.getElementsByTagName("Constant")],
+                structures: [...xml.getElementsByTagName("Structure")],
+                enumerations: [...xml.getElementsByTagName("Enumeration")],
             }
 
 
@@ -118,13 +122,15 @@ const path = require('path');
             feather_docs.constants = to_map(tags.constants.map(v=>parse_constant_tag(v)));
             feather_docs.structures = to_map(tags.structures.map(v=>parse_structure_tag(v)));
             feather_docs.enumerations = to_map(tags.enumerations.map(v=>parse_enumeration_tag(v)));
+            
+            //window.__feather_docs = feather_docs;
 
             const original_settext = aceEditor.tooltipManager.ttip.setText;
 
             aceEditor.tooltipManager.ttip.setText = function(...params) {
-                const key = (params[0] || '').split(/[\<\(]/)[0] || '';
-                console.log(key);
-                console.log(params);
+                const pos = aceEditor.renderer.screenToTextCoordinates(mouse.x,mouse.y);
+                const token = aceEditor.session.getTokenAt(pos.row,pos.column);
+                const key = token.value;
 
                 if (feather_docs.functions[key]) {
                     console.log(feather_docs.functions[key])
@@ -255,10 +261,16 @@ const path = require('path');
             }
         } else if (feather_docs.constants[key]) {
             // it's a constant
+            const cn = feather_docs.constants[key];
+            tooltip += `<span class="ace_constant">${cn.name}</span>`
         } else if (feather_docs.structures[key]) {
             // it's a struct
+            const st = feather_docs.structures[key];
+            tooltip += `<span class="ace_constant">${st.name}</span>`
         } else if (feather_docs.enumerations[key]) {
             // it's an enum
+            const en = feather_docs.enumerations[key];
+            tooltip += `<span class="ace_enumfield">${en.name}</span>`
         } else {
             found = false;
         }
@@ -268,4 +280,8 @@ const path = require('path');
 
         return found ? tooltip : '';
     }
+    window.addEventListener('mousemove',(evt)=>{
+        mouse.x = evt.clientX;
+        mouse.y = evt.clientY;
+    })
 })();
