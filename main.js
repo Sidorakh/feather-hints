@@ -247,10 +247,12 @@ const path = require('path');
             tooltip += `(${fn.params.map(v=>`${v.is_optional ? '[' : ''}${v.name}: ${v.type}${v.is_optional ? ']' : ''}`)})`;
             tooltip += `<hr/>`;
             tooltip += `${fn.description}`;
-            tooltip += `<hr/>`;
-            tooltip += `<table>`
-            tooltip += fn.params.map(v=>`<tr><td>${v.name}</td><td>${v.is_optional ? '@optional ' : ''} ${v.description}</td></tr>`).join('\n')
-            tooltip += '</table>'
+            if (fn.params.length > 0) {
+                tooltip += `<hr/>`;
+                tooltip += `<table>`
+                tooltip += fn.params.map(v=>`<tr><td>${v.name}</td><td>${v.is_optional ? '@optional ' : ''} ${v.description}</td></tr>`).join('\n')
+                tooltip += '</table>'
+            }
         } else if (feather_docs.variables[key]) {
             // it's a variable
             const vr = feather_docs.variables[key];
@@ -262,15 +264,19 @@ const path = require('path');
         } else if (feather_docs.constants[key]) {
             // it's a constant
             const cn = feather_docs.constants[key];
-            tooltip += `<span class="ace_constant">${cn.name}</span>`
+            tooltip += `<span class="ace_constant">${cn.name}</span>: ${cn.type}`;
+            if (cn.description) {
+                tooltip += "<hr/>";
+                tooltip += `${cn.description}`;
+            }
         } else if (feather_docs.structures[key]) {
             // it's a struct
             const st = feather_docs.structures[key];
-            tooltip += `<span class="ace_constant">${st.name}</span>`
+            tooltip += `<span class="ace_constant">${st.name}</span>`;
         } else if (feather_docs.enumerations[key]) {
             // it's an enum
             const en = feather_docs.enumerations[key];
-            tooltip += `<span class="ace_enumfield">${en.name}</span>`
+            tooltip += `<span class="ace_enumfield">${en.name}</span>`;
         } else {
             found = false;
         }
